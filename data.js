@@ -133,33 +133,40 @@ fetch('items.json')
         const slotName = slot.dataset.slot;
         plan[day][slotName] = [];
         slot.querySelectorAll('.item').forEach(item => {
-          plan[day][slotName].push(item.dataset.id);
+          if (item.dataset.id) {
+            plan[day][slotName].push(item.dataset.id);
+          }
         });
       });
     });
     localStorage.setItem('barcelona-itinerary', JSON.stringify(plan));
-    alert('Plan saved!');
+    alert('Itinerary saved!');
   }
+  
   
   function loadPlan() {
     const saved = localStorage.getItem('barcelona-itinerary');
     if (!saved) return;
     const plan = JSON.parse(saved);
+  
     document.querySelectorAll('.calendar-column').forEach(col => {
       const day = col.dataset.day;
       const slots = col.querySelectorAll('.time-slot');
       if (plan[day]) {
         slots.forEach(slot => {
           const slotName = slot.dataset.slot;
-          const names = plan[day][slotName] || [];
-          names.forEach(name => {
+          const ids = plan[day][slotName] || [];
+          ids.forEach(id => {
             const match = document.querySelector(`#item-panel .item[data-id="${id}"]`);
-            if (match) slot.appendChild(match);
+            if (match) {
+              slot.appendChild(match);
+            }
           });
         });
       }
     });
   }
+  
   
   function clearPlan() {
     localStorage.removeItem('barcelona-itinerary');
