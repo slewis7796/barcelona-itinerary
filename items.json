@@ -767,6 +767,45 @@
       "day_hint": "Unusual flavours and edible cones"
     },
     {
+      "name": "Restaurant El Sentit",
+      "emoji": "🇪🇸",
+      "category": "restaurant",
+      "type": "restaurant",
+      "area": "Hospitalet",
+      "summary": "Located on Carrer Santa Eulàlia, this Mediterranean restaurant offers cozy and casual dining with healthy options and a family-friendly atmosphere.",
+      "address": "Carrer Santa Eulàlia, 4908902 - L'Hospitalet de Llobregat (Barcelona)",
+      "photo": "",
+      "website": "https://www.restaurantelsentit.es/",
+      "open_time": "Tuesday to Sunday: 1:00 PM to 4:30 PM",
+      "day_hint": "Lunch only"
+    },
+    {
+      "name": "El Farolito",
+      "emoji": "🇪🇸",
+      "category": "restaurant",
+      "type": "restaurant",
+      "area": "Hospitalet",
+      "summary": "Come spend a pleasant evening with us. Check out our restaurant, El Farolito. In addition to being very welcoming, it will surprise you with delicious tapas, pizzas, grilled meat, rice dishes, and paella. Our outdoor area is especially beautiful. And when night falls and it gets cooler, you can move to the terrace with heaters. No matter what the weather is like outside, our air-conditioned rooms always maintain the perfect temperature.",
+      "address": "Plaça de Milagros Consarnau i Sabaté, 26, 08902 L'Hospitalet de Llobregat, Barcelona, Spain",
+      "photo": "",
+      "website": "https://elfarolito.eatbu.com/?lang=en",
+      "open_time": "11 am–12 am",
+      "day_hint": "This restaurant specializes in hearty dishes like paella and pizzas, served in a casual atmosphere with outdoor seating. Its family-friendly vibe makes it a great choice for your first evening."
+    },
+    {
+      "name": "Gauchitos Grill",
+      "emoji": "🇦🇷",
+      "category": "restaurant",
+      "type": "restaurant",
+      "area": "Hospitalet",
+      "summary": "An Argentinian barbecue restaurant offering flavorful grilled meats and South American dishes. Its casual atmosphere and live music make it an inviting spot for families.",
+      "address": "Passatge de Jansana, 6, 08902 L'Hospitalet de Llobregat, Barcelona, Spain",
+      "photo": "",
+      "website": "",
+      "open_time": "8pm to 11pm",
+      "day_hint": "Might be a good one to go to on first night"
+    },
+    {
       "name": "Lucciano's",
       "emoji": "🍦",
       "category": "restaurant",
