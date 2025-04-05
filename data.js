@@ -123,3 +123,47 @@ fetch('items.json')
   
   window.addEventListener('DOMContentLoaded', populateTabsAndPanel);
   
+  function savePlan() {
+    const plan = {};
+    document.querySelectorAll('.calendar-column').forEach(col => {
+      const day = col.dataset.day;
+      plan[day] = {};
+      col.querySelectorAll('.time-slot').forEach(slot => {
+        const slotName = slot.dataset.slot;
+        plan[day][slotName] = [];
+        slot.querySelectorAll('.item').forEach(item => {
+          plan[day][slotName].push(item.textContent.trim());
+        });
+      });
+    });
+    localStorage.setItem('barcelona-itinerary', JSON.stringify(plan));
+    alert('Plan saved!');
+  }
+  
+  function loadPlan() {
+    const saved = localStorage.getItem('barcelona-itinerary');
+    if (!saved) return;
+    const plan = JSON.parse(saved);
+    document.querySelectorAll('.calendar-column').forEach(col => {
+      const day = col.dataset.day;
+      const slots = col.querySelectorAll('.time-slot');
+      if (plan[day]) {
+        slots.forEach(slot => {
+          const slotName = slot.dataset.slot;
+          const names = plan[day][slotName] || [];
+          names.forEach(name => {
+            const match = Array.from(document.querySelectorAll('#item-panel .item')).find(i => i.textContent.trim() === name);
+            if (match) slot.appendChild(match);
+          });
+        });
+      }
+    });
+  }
+  
+  function clearPlan() {
+    localStorage.removeItem('barcelona-itinerary');
+    location.reload();
+  }
+  
+  window.addEventListener('load', loadPlan);
+  
