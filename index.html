@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Barcelona Itinerary Planner</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Barcelona Itinerary Planner</h1>
+    <p>Drag and drop activities into your plan (13–19 April). Click any item to see more info.</p>
+  </header>
+
+  <div class="calendar-container">
+    <div class="time-labels">
+      <div class="time-slot"></div> <!-- for header blank space -->
+      <div class="time-slot">Morning</div>
+      <div class="time-slot">Lunch (14:30)</div>
+      <div class="time-slot">Afternoon</div>
+      <div class="time-slot">Dinner</div>
+    </div>
+  
+    <!-- Repeat for each day with label and column -->
+    <div class="calendar-day">
+      <div class="day-label">Sat<br>13 Apr</div>
+      <div class="calendar-column" data-day="13"></div>
+    </div>
+    <div class="calendar-day">
+      <div class="day-label">Sun<br>14 Apr</div>
+      <div class="calendar-column" data-day="14"></div>
+    </div>
+    <div class="calendar-day">
+        <div class="day-label">Mon<br>15 Apr</div>
+        <div class="calendar-column" data-day="15"></div>
+      </div>
+      <div class="calendar-day">
+        <div class="day-label">Tue<br>16 Apr</div>
+        <div class="calendar-column" data-day="16"></div>
+      </div>
+      <div class="calendar-day">
+        <div class="day-label">Wed<br>17 Apr</div>
+        <div class="calendar-column" data-day="17"></div>
+      </div>
+      <div class="calendar-day">
+        <div class="day-label">Thu<br>18 Apr</div>
+        <div class="calendar-column" data-day="18"></div>
+      </div>
+      <div class="calendar-day">
+        <div class="day-label">Fri<br>19 Apr</div>
+        <div class="calendar-column" data-day="19"></div>
+      </div>
+  </div>
+  
+
+  <div class="tabs" id="tabs"></div>
+
+  <div class="filter-controls">
+    <label for="type-filter">Filter by type:</label>
+    <select id="type-filter">
+      <option value="all">All</option>
+      <option value="bookshop">Bookshops</option>
+      <option value="restaurant">Restaurants</option>
+      <option value="attraction">Attractions</option>
+      <option value="shopping">Shopping</option>
+      <option value="cafe">Cafés</option>
+    </select>
+  </div>
+
+  <section class="item-panel" id="item-panel"></section>
+
+  <section class="bin-area" id="bin">🗑️ Drag here to delete item from your calendar</section>
+
+  <div class="overlay" id="overlay"></div>
+  <div class="modal" id="modal">
+    <h3 id="modal-title"></h3>
+    <p id="modal-summary" style="font-style: italic;"></p>
+    <p id="modal-category"></p>
+    <p><strong>Opening Hours:</strong> <span id="modal-hours"></span></p>
+    <p><strong>Address:</strong> <span id="modal-address"></span></p>
+    <p><strong>Hint:</strong> <span id="modal-hint"></span></p>
+    <p><a href="#" id="modal-website" target="_blank">Visit website</a></p>
+    <img id="modal-photo" src="" alt="" style="width: 100%; margin-top: 10px;" />
+    <iframe id="modal-map" src="" style="margin-top: 10px;"></iframe>
+    <div class="modal-close">
+      <button onclick="closeModal()">Close</button>
+    </div>
+  </div>
+  
+
+  <script src="data.js"></script>
+</body>
+</html>
