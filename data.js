@@ -35,6 +35,7 @@ fetch('items.json')
   
     items.forEach(item => {
       const el = document.createElement('div');
+      el.dataset.id = item.id;
       el.className = `item ${item.category}`;
       el.textContent = `${item.emoji || ''} ${item.name}`;
       el.dataset.area = item.area;
@@ -132,7 +133,7 @@ fetch('items.json')
         const slotName = slot.dataset.slot;
         plan[day][slotName] = [];
         slot.querySelectorAll('.item').forEach(item => {
-          plan[day][slotName].push(item.textContent.trim());
+          plan[day][slotName].push(item.dataset.id);
         });
       });
     });
@@ -152,7 +153,7 @@ fetch('items.json')
           const slotName = slot.dataset.slot;
           const names = plan[day][slotName] || [];
           names.forEach(name => {
-            const match = Array.from(document.querySelectorAll('#item-panel .item')).find(i => i.textContent.trim() === name);
+            const match = document.querySelector(`#item-panel .item[data-id="${id}"]`);
             if (match) slot.appendChild(match);
           });
         });
