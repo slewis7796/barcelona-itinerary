@@ -1,5 +1,5 @@
 body { font-family: sans-serif; margin: 0; padding: 0; }
-header { background: #005a9c; color: white; padding: 1rem; text-align: center; }
+header { background: hsl(205, 97%, 75%); color: white; padding: 1rem; text-align: center; }
 .calendar-container {
   display: grid;
   grid-template-columns: 200px repeat(7, 1fr);
@@ -43,8 +43,11 @@ header { background: #005a9c; color: white; padding: 1rem; text-align: center; }
   cursor: grab;
   display: inline-block;
   font-size: 0.9rem;
-  white-space: nowrap;
   position: relative;
+  max-width: 100%;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 .item.kid { background: #b3e5fc; }         /* Light blue */
 .item.family { background: #ffe082; }      /* Light orange */

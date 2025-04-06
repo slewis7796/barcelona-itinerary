@@ -28,6 +28,20 @@
     "day_hint": "Allow time for Terminal 1–2 transfer"
   },
   {
+    "id": "tennis-club",
+    "name": "Real Club de Tennis Barcelona",
+    "emoji": "🎾",
+    "category": "kid",
+    "type": "attraction",
+    "area": "n/a",
+    "summary": "This is where we'll be watching the tennis",
+    "address": "Real Club de Tennis Barcelona, Carrer de Bosch i Gimpera, 5-13, Les Corts, 08034 Barcelona, Spain",
+    "photo": "",
+    "website": "",
+    "open_time": "10am to 7pm",
+    "day_hint": "We will stay until we can"
+  },
+  {
     "id": "bogatell-beach",
     "name": "Bogatell Beach",
     "emoji": "🏖️",
