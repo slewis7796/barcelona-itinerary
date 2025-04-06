@@ -31,39 +31,51 @@ function updateDayPlan(day) {
 }
 
 function renderMapForDay(day, dayPlan) {
-  const slotOrder = ['morning', 'lunch', 'afternoon', 'dinner'];
-  const idsInOrder = slotOrder.flatMap(slot => dayPlan[slot] || []);
-  const items = slugMap(idsInOrder);
-  const mapContainer = document.getElementById('map');
-
-  if (items.length === 0) {
-    mapContainer.innerHTML = "<p>No map locations for this day.</p>";
-    return;
-  }
-
-  const apartment = itemsData.find(i => i.name === "Barcelona Touch Apartments - Rosich");
-  const links = [];
-
-  // Add Apartment → First Stop (if not the same)
-  if (day >= "14" && day <= "19" && apartment && items[0] && apartment.address !== items[0].address) {
-    const url = `https://www.google.com/maps/dir/${encodeURIComponent(apartment.address)}/${encodeURIComponent(items[0].address)}`;
-    links.push(`<a href="${url}" target="_blank">🏁 From Apartment → ${items[0].name}</a>`);
-  }
-
-  // A → B, B → C, etc.
-  for (let i = 0; i < items.length - 1; i++) {
-    const from = items[i];
-    const to = items[i + 1];
-    if (from.address && to.address) {
-      const url = `https://www.google.com/maps/dir/${encodeURIComponent(from.address)}/${encodeURIComponent(to.address)}`;
-      links.push(`<a href="${url}" target="_blank">➡️ ${from.name} → ${to.name}</a>`);
+    const slotOrder = ['morning', 'lunch', 'afternoon', 'dinner'];
+    const idsInOrder = slotOrder.flatMap(slot => dayPlan[slot] || []);
+    const items = slugMap(idsInOrder);
+    const mapContainer = document.getElementById('map');
+  
+    if (items.length === 0) {
+      mapContainer.innerHTML = "<p>No map locations for this day.</p>";
+      return;
     }
+  
+    const apartment = itemsData.find(i => i.name === "Barcelona Touch Apartments - Rosich");
+    const links = [];
+  
+    // Add Apartment → First Stop (if applicable)
+    const showApartmentLink = day >= "14" && day <= "19" && apartment && items[0] && apartment.address !== items[0].address;
+    if (showApartmentLink) {
+      const url = `https://www.google.com/maps/dir/${encodeURIComponent(apartment.address)}/${encodeURIComponent(items[0].address)}`;
+      links.push(`<a href="${url}" target="_blank">🏁 From Apartment → ${items[0].name}</a>`);
+    }
+  
+    // A → B, B → C, etc.
+    for (let i = 0; i < items.length - 1; i++) {
+      const from = items[i];
+      const to = items[i + 1];
+      if (from.address && to.address) {
+        const url = `https://www.google.com/maps/dir/${encodeURIComponent(from.address)}/${encodeURIComponent(to.address)}`;
+        links.push(`<a href="${url}" target="_blank">➡️ ${from.name} → ${to.name}</a>`);
+      }
+    }
+  
+    // Full route (exclude apartment)
+    const fullRouteItems = items.filter(i => i.name !== "Barcelona Touch Apartments - Rosich");
+    const fullRouteAddresses = fullRouteItems.map(i => i.address).filter(Boolean);
+  
+    if (fullRouteAddresses.length > 1) {
+      const fullUrl = "https://www.google.com/maps/dir/" + fullRouteAddresses.map(addr => encodeURIComponent(addr)).join('/');
+      links.push(`<a href="${fullUrl}" target="_blank"><strong>🗺️ View Full Route</strong></a>`);
+    }
+  
+    mapContainer.innerHTML = links.length > 0
+      ? `<div style="display: flex; flex-direction: column; gap: 0.5rem;">${links.join('')}</div>`
+      : "<p>No valid routes to show.</p>";
   }
-
-  mapContainer.innerHTML = links.length > 0
-    ? `<div style="display: flex; flex-direction: column; gap: 0.5rem;">${links.join('')}</div>`
-    : "<p>No valid routes to show.</p>";
-}
+    
+  
 
 window.addEventListener('DOMContentLoaded', async () => {
   await loadItems();
