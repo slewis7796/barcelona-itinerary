@@ -44,29 +44,33 @@ function renderMapForDay(day, dayPlan) {
     const apartment = itemsData.find(i => i.name === "Barcelona Touch Apartments - Rosich");
     const links = [];
   
-    // Add Apartment → First Stop (if applicable)
-    const showApartmentLink = day >= "14" && day <= "19" && apartment && items[0] && apartment.address !== items[0].address;
-    if (showApartmentLink) {
-      const url = `https://www.google.com/maps/dir/${encodeURIComponent(apartment.address)}/${encodeURIComponent(items[0].address)}`;
+    // Apartment → First Stop
+    const showApartmentLink = day >= "14" && day <= "19" && apartment && items[0];
+    if (showApartmentLink && apartment.address && items[0].address) {
+      const start = `${apartment.name}, ${apartment.address}`;
+      const end = `${items[0].name}, ${items[0].address}`;
+      const url = `https://www.google.com/maps/dir/${encodeURIComponent(start)}/${encodeURIComponent(end)}`;
       links.push(`<a href="${url}" target="_blank">🏁 From Apartment → ${items[0].name}</a>`);
     }
   
-    // A → B, B → C, etc.
+    // Step-by-step links
     for (let i = 0; i < items.length - 1; i++) {
       const from = items[i];
       const to = items[i + 1];
       if (from.address && to.address) {
-        const url = `https://www.google.com/maps/dir/${encodeURIComponent(from.address)}/${encodeURIComponent(to.address)}`;
+        const fromFull = `${from.name}, ${from.address}`;
+        const toFull = `${to.name}, ${to.address}`;
+        const url = `https://www.google.com/maps/dir/${encodeURIComponent(fromFull)}/${encodeURIComponent(toFull)}`;
         links.push(`<a href="${url}" target="_blank">➡️ ${from.name} → ${to.name}</a>`);
       }
     }
   
-    // Full route (exclude apartment)
+    // Full route (excluding apartment)
     const fullRouteItems = items.filter(i => i.name !== "Barcelona Touch Apartments - Rosich");
-    const fullRouteAddresses = fullRouteItems.map(i => i.address).filter(Boolean);
+    const fullRouteStops = fullRouteItems.map(i => `${i.name}, ${i.address}`).filter(Boolean);
   
-    if (fullRouteAddresses.length > 1) {
-      const fullUrl = "https://www.google.com/maps/dir/" + fullRouteAddresses.map(addr => encodeURIComponent(addr)).join('/');
+    if (fullRouteStops.length > 1) {
+      const fullUrl = "https://www.google.com/maps/dir/" + fullRouteStops.map(s => encodeURIComponent(s)).join('/');
       links.push(`<a href="${fullUrl}" target="_blank"><strong>🗺️ View Full Route</strong></a>`);
     }
   
@@ -74,7 +78,7 @@ function renderMapForDay(day, dayPlan) {
       ? `<div style="display: flex; flex-direction: column; gap: 0.5rem;">${links.join('')}</div>`
       : "<p>No valid routes to show.</p>";
   }
-    
+      
   
 
 window.addEventListener('DOMContentLoaded', async () => {
