@@ -87,8 +87,8 @@ function populateTabsAndPanel() {
       document.getElementById('modal-website').textContent = item.website ? 'Visit website' : '';
       document.getElementById('modal-photo').src = item.photo || '';
       document.getElementById('modal-photo').style.display = item.photo ? 'block' : 'none';
-      const mapQuery = encodeURIComponent(item.address || item.name + ' Barcelona');
-      document.getElementById('modal-map').src = `https://www.google.com/maps?q=${mapQuery}&output=embed`;
+      const fullMapQuery = encodeURIComponent(`${item.name}, ${item.address}`);
+      document.getElementById('modal-map').src = `https://www.google.com/maps?q=${fullMapQuery}&output=embed`;
       document.getElementById('overlay').classList.add('active');
       document.getElementById('modal').classList.add('active');
     });
