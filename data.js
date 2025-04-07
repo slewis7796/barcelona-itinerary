@@ -1,4 +1,5 @@
 // calendar.js - for index.html (drag-and-drop itinerary planner)
+const serverUrl = '/api/itinerary';
 
 let items = [];
 
