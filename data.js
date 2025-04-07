@@ -184,6 +184,37 @@ async function loadPlan() {
   }
 }
 
+function applyPlan(plan) {
+  document.querySelectorAll('.calendar-column').forEach(col => {
+    const day = col.dataset.day;
+    const slots = col.querySelectorAll('.time-slot');
+
+    // Clear any existing items
+    slots.forEach(slot => slot.innerHTML = '');
+
+    if (plan[day]) {
+      slots.forEach(slot => {
+        const slotName = slot.dataset.slot;
+        const ids = plan[day][slotName] || [];
+
+        ids.forEach(id => {
+          const match = document.querySelector(`#item-panel .item[data-id="${id}"]`);
+          if (match) {
+            const clone = match.cloneNode(true);
+            clone.setAttribute('draggable', true);
+            clone.addEventListener('dragstart', e => {
+              window.draggedItem = clone;
+              e.dataTransfer.effectAllowed = 'move';
+            });
+            slot.appendChild(clone);
+          }
+        });
+      });
+    }
+  });
+}
+
+
 window.addEventListener('load', () => {
   setTimeout(() => loadPlan(), 500);
 });
