@@ -164,16 +164,21 @@ async function savePlan() {
   });
 
   try {
-    const response = await fetch('https://script.google.com/macros/s/AKfycbw1W4umAb9NepehLOczOCtL21z2rvCgYnN23ubJE2_tlKiedm9LrrQoU2MlIqbVJ68P_w/exec', {
-      method: 'POST',
-      body: JSON.stringify(plan),
-      headers: { 'Content-Type': 'application/json' }
+    const formData = new FormData();
+    formData.append("data", JSON.stringify(plan));
+
+    const response = await fetch("https://script.google.com/macros/s/AKfycbw1W4umAb9NepehLOczOCtL21z2rvCgYnN23ubJE2_tlKiedm9LrrQoU2MlIqbVJ68P_w/exec", {
+      method: "POST",
+      body: formData,
     });
 
-    if (response.ok) {
+    const text = await response.text();
+    console.log("✅ Response from Google Sheets:", text);
+
+    if (response.ok && text === "Success") {
       alert("✅ Itinerary saved to Google Sheets!");
     } else {
-      throw new Error("Failed to save");
+      throw new Error(`Unexpected response: ${text}`);
     }
   } catch (error) {
     console.error("❌ Error saving plan:", error);
