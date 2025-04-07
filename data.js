@@ -151,8 +151,8 @@ async function savePlan() {
   const plan = {}; // This will be your itinerary data.
 
   // GitHub repository details
-  const repoOwner = 'your-github-username';  // Replace with your GitHub username
-  const repoName = 'your-repository-name';  // The name of your existing repository
+  const repoOwner = 'slewis7796';  // Replace with your GitHub username
+  const repoName = 'barcelona-itinerary';  // The name of your existing repository
   const filePath = 'itinerary.json';  // Path to the JSON file you created in the repo
   const githubToken = 'your-github-token';  // Your personal access token
 
