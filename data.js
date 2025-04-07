@@ -164,16 +164,16 @@ async function savePlan() {
   });
 
   try {
-    const formData = new FormData();
-    formData.append("data", JSON.stringify(plan));
-
-    const response = await fetch("https://script.google.com/macros/s/AKfycbw1W4umAb9NepehLOczOCtL21z2rvCgYnN23ubJE2_tlKiedm9LrrQoU2MlIqbVJ68P_w/exec", {
+    const response = await fetch("https://znv6l9z9bh.execute-api.eu-west-1.amazonaws.com/prod/itinerary", {
       method: "POST",
-      body: formData,
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(plan),
     });
 
     const text = await response.text();
-    console.log("✅ Response from Google Sheets:", text);
+    console.log("✅ Response from API:", text);
 
     if (response.ok && text === "Success") {
       alert("✅ Itinerary saved to Google Sheets!");
