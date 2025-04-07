@@ -196,15 +196,26 @@ async function loadPlan() {
 
   const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
 
-  const response = await fetch(url);
-  const data = await response.json();
-  
-  // Decode the content (Base64)
-  const decodedContent = atob(data.content);
-  const plan = JSON.parse(decodedContent);
-  
-  // Now you can use the `plan` object to populate your itinerary
-  console.log(plan);
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('GitHub file not found or error fetching the file');
+    }
+    const data = await response.json();
+    
+    // Decode the Base64 content if it exists
+    if (data.content) {
+      const decodedContent = atob(data.content); // Decode the Base64 data
+      const plan = JSON.parse(decodedContent);   // Parse the JSON data
+
+      // Now you can use `plan` to populate your itinerary
+      console.log(plan);
+    } else {
+      console.error("No content found in the GitHub file.");
+    }
+  } catch (error) {
+    console.error('Error loading the plan:', error);
+  }
 }
 
 
