@@ -153,48 +153,38 @@ function clearPlan() {
   location.reload();
 }
 
-function savePlan() {
-  const plan = {};
-  document.querySelectorAll('.calendar-column').forEach(col => {
-    const day = col.dataset.day;
-    plan[day] = {};
-    col.querySelectorAll('.time-slot').forEach(slot => {
-      const slotName = slot.dataset.slot;
-      plan[day][slotName] = [];
-      slot.querySelectorAll('.item').forEach(item => {
-        if (item.dataset.id) {
-          plan[day][slotName].push(item.dataset.id);
-        }
-      });
-    });
+
+async function savePlan(plan) {
+  const response = await fetch(serverUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(plan),
   });
-  localStorage.setItem('barcelona-itinerary', JSON.stringify(plan));
-  alert('Itinerary saved!');
+
+  if (!response.ok) {
+    const error = await response.json();
+    console.error('❌ Error saving plan:', error);
+    alert('Failed to save itinerary.');
+  } else {
+    console.log('✅ Itinerary saved!');
+    alert('Itinerary saved!');
+  }
 }
 
-function loadPlan() {
-  const saved = localStorage.getItem('barcelona-itinerary');
-  if (!saved) return;
-  const plan = JSON.parse(saved);
-  document.querySelectorAll('.calendar-column').forEach(col => {
-    const day = col.dataset.day;
-    const slots = col.querySelectorAll('.time-slot');
-    if (plan[day]) {
-      slots.forEach(slot => {
-        const slotName = slot.dataset.slot;
-        const ids = plan[day][slotName] || [];
-        ids.forEach(id => {
-          const match = document.querySelector(`#item-panel .item[data-id="${id}"]`);
-          if (match) {
-            slot.appendChild(match);
-          }
-        });
-      });
-    }
-  });
+async function loadPlan() {
+  try {
+    const response = await fetch(serverUrl);
+    if (!response.ok) throw new Error('Failed to load');
+
+    const plan = await response.json();
+    console.log('✅ Loaded plan:', plan);
+    applyPlan(plan);
+  } catch (err) {
+    console.error('❌ Failed to load itinerary:', err);
+  }
 }
 
 window.addEventListener('load', () => {
-  setTimeout(loadPlan, 500);
+  setTimeout(() => loadPlan(), 500);
 });
 
