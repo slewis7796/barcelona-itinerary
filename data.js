@@ -149,84 +149,43 @@ function closeModal() {
   document.getElementById('modal').classList.remove('active');
 }
 
-async function savePlan() {
-  const plan = {}; // This will be your itinerary data.
+// Update the URLs to use your Vercel API
+const serverUrl = 'https://barcelona-itinerary.vercel.app/api/itinerary';
 
-  // GitHub repository details
-  const repoOwner = 'slewis7796';  // Your GitHub username
-  const repoName = 'barcelona-itinerary';  // Your repository name
-  const filePath = 'itinerary.json';  // Path to the JSON file you created in the repo
-
-  const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
-
-  // Get the current file details (for versioning)
-  const response = await fetch(url, {
-    method: 'GET',
+async function savePlan(plan) {
+  const response = await fetch(serverUrl, {
+    method: 'POST',
     headers: {
-      'Authorization': `token ${githubToken}`,
-    },
-  });
-
-  const data = await response.json();
-
-  // If the file doesn't exist yet, this will return undefined
-  if (!data.sha) {
-    console.error('Error fetching file details: ', data);
-    return;
-  }
-
-  const sha = data.sha; // Get the file's SHA for version control
-
-  // Make the POST request to update the file
-  const commitResponse = await fetch(url, {
-    method: 'PUT',
-    headers: {
-      'Authorization': `token ${githubToken}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      message: 'Update itinerary plan',
-      content: btoa(JSON.stringify(plan)), // Base64 encode the JSON data
-      sha: sha // This ensures you're updating the file, not creating a new one
-    })
+    body: JSON.stringify(plan),
   });
 
-  const commitData = await commitResponse.json();
-  console.log(commitData);
-  alert('Itinerary saved successfully!');
-}
-
-
-
-async function loadPlan() {
-  const repoOwner = 'slewis7796';  // Replace with your GitHub username
-  const repoName = 'barcelona-itinerary';  // The name of your existing repository
-  const filePath = 'itinerary.json';  // Path to the JSON file in your repo
-
-  const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
-
-  try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error('GitHub file not found or error fetching the file');
-    }
-    const data = await response.json();
-    
-    // Decode the Base64 content if it exists
-    if (data.content) {
-      const decodedContent = atob(data.content); // Decode the Base64 data
-      const plan = JSON.parse(decodedContent);   // Parse the JSON data
-
-      // Now you can use `plan` to populate your itinerary
-      console.log(plan);
-    } else {
-      console.error("No content found in the GitHub file.");
-    }
-  } catch (error) {
-    console.error('Error loading the plan:', error);
+  if (response.ok) {
+    alert('Itinerary saved!');
+  } else {
+    alert('Failed to save itinerary.');
   }
 }
 
+async function loadPlan() {
+  const response = await fetch(serverUrl);
+  const data = await response.json();
+  console.log('Loaded plan:', data); // Check if the data is being loaded
+
+  // Populate your UI with the data
+  data.forEach((item) => {
+    const itemEl = document.createElement('div');
+    itemEl.className = 'item';
+    itemEl.innerHTML = `
+      <h3>${item.name}</h3>
+      <p>${item.summary}</p>
+      <p><strong>Address:</strong> ${item.address}</p>
+      <p><a href="${item.website}" target="_blank">Visit website</a></p>
+    `;
+    document.getElementById('item-panel').appendChild(itemEl);
+  });
+}
 
 
 function clearPlan() {
