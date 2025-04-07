@@ -1,5 +1,4 @@
 // calendar.js - for index.html (drag-and-drop itinerary planner)
-const githubToken = process.env.GITHUB_TOKEN;
 
 let items = [];
 
@@ -148,50 +147,53 @@ function closeModal() {
   document.getElementById('modal').classList.remove('active');
 }
 
-// Update the URLs to use your Vercel API
-const serverUrl = 'https://barcelona-itinerary.vercel.app/api/itinerary';
-
-async function savePlan(plan) {
-  const response = await fetch(serverUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(plan),
-  });
-
-  if (response.ok) {
-    alert('Itinerary saved!');
-  } else {
-    alert('Failed to save itinerary.');
-  }
-}
-
-async function loadPlan() {
-  const response = await fetch(serverUrl);
-  const data = await response.json();
-  console.log('Loaded plan:', data); // Check if the data is being loaded
-
-  // Populate your UI with the data
-  data.forEach((item) => {
-    const itemEl = document.createElement('div');
-    itemEl.className = 'item';
-    itemEl.innerHTML = `
-      <h3>${item.name}</h3>
-      <p>${item.summary}</p>
-      <p><strong>Address:</strong> ${item.address}</p>
-      <p><a href="${item.website}" target="_blank">Visit website</a></p>
-    `;
-    document.getElementById('item-panel').appendChild(itemEl);
-  });
-}
-
-
 function clearPlan() {
   localStorage.removeItem('barcelona-itinerary');
   location.reload();
 }
 
+function savePlan() {
+  const plan = {};
+  document.querySelectorAll('.calendar-column').forEach(col => {
+    const day = col.dataset.day;
+    plan[day] = {};
+    col.querySelectorAll('.time-slot').forEach(slot => {
+      const slotName = slot.dataset.slot;
+      plan[day][slotName] = [];
+      slot.querySelectorAll('.item').forEach(item => {
+        if (item.dataset.id) {
+          plan[day][slotName].push(item.dataset.id);
+        }
+      });
+    });
+  });
+  localStorage.setItem('barcelona-itinerary', JSON.stringify(plan));
+  alert('Itinerary saved!');
+}
+
+function loadPlan() {
+  const saved = localStorage.getItem('barcelona-itinerary');
+  if (!saved) return;
+  const plan = JSON.parse(saved);
+  document.querySelectorAll('.calendar-column').forEach(col => {
+    const day = col.dataset.day;
+    const slots = col.querySelectorAll('.time-slot');
+    if (plan[day]) {
+      slots.forEach(slot => {
+        const slotName = slot.dataset.slot;
+        const ids = plan[day][slotName] || [];
+        ids.forEach(id => {
+          const match = document.querySelector(`#item-panel .item[data-id="${id}"]`);
+          if (match) {
+            slot.appendChild(match);
+          }
+        });
+      });
+    }
+  });
+}
+
 window.addEventListener('load', () => {
   setTimeout(loadPlan, 500);
 });
+
