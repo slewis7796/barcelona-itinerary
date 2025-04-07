@@ -151,10 +151,9 @@ async function savePlan() {
   const plan = {}; // This will be your itinerary data.
 
   // GitHub repository details
-  const repoOwner = 'slewis7796';  // Replace with your GitHub username
-  const repoName = 'barcelona-itinerary';  // The name of your existing repository
+  const repoOwner = 'slewis7796';  // Your GitHub username
+  const repoName = 'barcelona-itinerary';  // Your repository name
   const filePath = 'itinerary.json';  // Path to the JSON file you created in the repo
-  const githubToken = 'your-github-token';  // Your personal access token
 
   const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
 
@@ -167,6 +166,13 @@ async function savePlan() {
   });
 
   const data = await response.json();
+
+  // If the file doesn't exist yet, this will return undefined
+  if (!data.sha) {
+    console.error('Error fetching file details: ', data);
+    return;
+  }
+
   const sha = data.sha; // Get the file's SHA for version control
 
   // Make the POST request to update the file
@@ -187,6 +193,7 @@ async function savePlan() {
   console.log(commitData);
   alert('Itinerary saved successfully!');
 }
+
 
 
 async function loadPlan() {
