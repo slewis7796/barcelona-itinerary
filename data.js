@@ -147,7 +147,7 @@ function closeModal() {
   document.getElementById('modal').classList.remove('active');
 }
 
-function savePlan() {
+async function savePlan() {
   const plan = {};
   document.querySelectorAll('.calendar-column').forEach(col => {
     const day = col.dataset.day;
@@ -162,32 +162,54 @@ function savePlan() {
       });
     });
   });
-  localStorage.setItem('barcelona-itinerary', JSON.stringify(plan));
-  alert('Itinerary saved!');
-}
 
-function loadPlan() {
-  const saved = localStorage.getItem('barcelona-itinerary');
-  if (!saved) return;
-  const plan = JSON.parse(saved);
+  try {
+    const response = await fetch('https://script.google.com/macros/s/AKfycbw1W4umAb9NepehLOczOCtL21z2rvCgYnN23ubJE2_tlKiedm9LrrQoU2MlIqbVJ68P_w/exec', {
+      method: 'POST',
+      body: JSON.stringify(plan),
+      headers: { 'Content-Type': 'application/json' }
+    });
 
-  document.querySelectorAll('.calendar-column').forEach(col => {
-    const day = col.dataset.day;
-    const slots = col.querySelectorAll('.time-slot');
-    if (plan[day]) {
-      slots.forEach(slot => {
-        const slotName = slot.dataset.slot;
-        const ids = plan[day][slotName] || [];
-        ids.forEach(id => {
-          const match = document.querySelector(`#item-panel .item[data-id="${id}"]`);
-          if (match) {
-            slot.appendChild(match);
-          }
-        });
-      });
+    if (response.ok) {
+      alert("✅ Itinerary saved to Google Sheets!");
+    } else {
+      throw new Error("Failed to save");
     }
-  });
+  } catch (error) {
+    console.error("❌ Error saving plan:", error);
+    alert("⚠️ Failed to save your itinerary.");
+  }
 }
+
+
+async function loadPlan() {
+  try {
+    const response = await fetch('https://script.google.com/macros/s/AKfycbw1W4umAb9NepehLOczOCtL21z2rvCgYnN23ubJE2_tlKiedm9LrrQoU2MlIqbVJ68P_w/exec');
+    const plan = await response.json();
+
+    document.querySelectorAll('.calendar-column').forEach(col => {
+      const day = col.dataset.day;
+      const slots = col.querySelectorAll('.time-slot');
+      if (plan[day]) {
+        slots.forEach(slot => {
+          const slotName = slot.dataset.slot;
+          const ids = plan[day][slotName] || [];
+          ids.forEach(id => {
+            const match = document.querySelector(`#item-panel .item[data-id="${id}"]`);
+            if (match) {
+              slot.appendChild(match);
+            }
+          });
+        });
+      }
+    });
+
+    console.log("✅ Plan loaded from Google Sheets");
+  } catch (error) {
+    console.error("❌ Failed to load plan:", error);
+  }
+}
+
 
 function clearPlan() {
   localStorage.removeItem('barcelona-itinerary');
