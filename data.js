@@ -190,8 +190,8 @@ async function savePlan() {
 
 
 async function loadPlan() {
-  const repoOwner = 'your-github-username';  // Replace with your GitHub username
-  const repoName = 'your-repository-name';  // The name of your existing repository
+  const repoOwner = 'slewis7796';  // Replace with your GitHub username
+  const repoName = 'barcelona-itinerary';  // The name of your existing repository
   const filePath = 'itinerary.json';  // Path to the JSON file in your repo
 
   const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
