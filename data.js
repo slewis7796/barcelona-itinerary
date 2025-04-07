@@ -148,72 +148,65 @@ function closeModal() {
 }
 
 async function savePlan() {
-  const plan = {};
-  document.querySelectorAll('.calendar-column').forEach(col => {
-    const day = col.dataset.day;
-    plan[day] = {};
-    col.querySelectorAll('.time-slot').forEach(slot => {
-      const slotName = slot.dataset.slot;
-      plan[day][slotName] = [];
-      slot.querySelectorAll('.item').forEach(item => {
-        if (item.dataset.id) {
-          plan[day][slotName].push(item.dataset.id);
-        }
-      });
-    });
+  const plan = {}; // This will be your itinerary data.
+
+  // GitHub repository details
+  const repoOwner = 'your-github-username';  // Replace with your GitHub username
+  const repoName = 'your-repository-name';  // The name of your existing repository
+  const filePath = 'itinerary.json';  // Path to the JSON file you created in the repo
+  const githubToken = 'your-github-token';  // Your personal access token
+
+  const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
+
+  // Get the current file details (for versioning)
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Authorization': `token ${githubToken}`,
+    },
   });
 
-  try {
-    const response = await fetch("https://znv6l9z9bh.execute-api.eu-west-1.amazonaws.com/prod", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(plan),
-    });
+  const data = await response.json();
+  const sha = data.sha; // Get the file's SHA for version control
 
-    const text = await response.text();
-    console.log("✅ Response from API:", text);
+  // Make the POST request to update the file
+  const commitResponse = await fetch(url, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `token ${githubToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      message: 'Update itinerary plan',
+      content: btoa(JSON.stringify(plan)), // Base64 encode the JSON data
+      sha: sha // This ensures you're updating the file, not creating a new one
+    })
+  });
 
-    if (response.ok && text === "Success") {
-      alert("✅ Itinerary saved to Google Sheets!");
-    } else {
-      throw new Error(`Unexpected response: ${text}`);
-    }
-  } catch (error) {
-    console.error("❌ Error saving plan:", error);
-    alert("⚠️ Failed to save your itinerary.");
-  }
+  const commitData = await commitResponse.json();
+  console.log(commitData);
+  alert('Itinerary saved successfully!');
 }
 
 
 async function loadPlan() {
-  try {
-    const response = await fetch('https://script.google.com/macros/s/AKfycbw1W4umAb9NepehLOczOCtL21z2rvCgYnN23ubJE2_tlKiedm9LrrQoU2MlIqbVJ68P_w/exec');
-    const plan = await response.json();
+  const repoOwner = 'your-github-username';  // Replace with your GitHub username
+  const repoName = 'your-repository-name';  // The name of your existing repository
+  const filePath = 'itinerary.json';  // Path to the JSON file in your repo
 
-    document.querySelectorAll('.calendar-column').forEach(col => {
-      const day = col.dataset.day;
-      const slots = col.querySelectorAll('.time-slot');
-      if (plan[day]) {
-        slots.forEach(slot => {
-          const slotName = slot.dataset.slot;
-          const ids = plan[day][slotName] || [];
-          ids.forEach(id => {
-            const match = document.querySelector(`#item-panel .item[data-id="${id}"]`);
-            if (match) {
-              slot.appendChild(match);
-            }
-          });
-        });
-      }
-    });
+  const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
 
-    console.log("✅ Plan loaded from Google Sheets");
-  } catch (error) {
-    console.error("❌ Failed to load plan:", error);
-  }
+  const response = await fetch(url);
+  const data = await response.json();
+  
+  // Decode the content (Base64)
+  const decodedContent = atob(data.content);
+  const plan = JSON.parse(decodedContent);
+  
+  // Now you can use the `plan` object to populate your itinerary
+  console.log(plan);
 }
+
 
 
 function clearPlan() {
