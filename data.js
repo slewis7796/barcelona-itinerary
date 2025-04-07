@@ -1,5 +1,4 @@
 // calendar.js - for index.html (drag-and-drop itinerary planner)
-require('dotenv').config();
 const githubToken = process.env.GITHUB_TOKEN;
 
 let items = [];
