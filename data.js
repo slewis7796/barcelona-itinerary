@@ -164,7 +164,7 @@ async function savePlan() {
   });
 
   try {
-    const response = await fetch("https://znv6l9z9bh.execute-api.eu-west-1.amazonaws.com/prod/itinerary", {
+    const response = await fetch("https://znv6l9z9bh.execute-api.eu-west-1.amazonaws.com/prod", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
