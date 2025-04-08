@@ -1,59 +1,60 @@
-// api/itinerary.js
+// /api/itinerary.js
 
 export default async function handler(req, res) {
-    const token = process.env.GITHUB_TOKEN;
-    const owner = 'slewis7796';
-    const repo = 'barcelona-itinerary';
-    const path = 'itinerary.json';
+    const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+    const REPO = 'barcelona-itinerary'; // Replace if different
+    const USERNAME = 'slewis7796';
+    const FILE_PATH = 'itinerary.json';
+    const BRANCH = 'main';
   
-    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+    const fileUrl = `https://api.github.com/repos/${USERNAME}/${REPO}/contents/${FILE_PATH}`;
   
     if (req.method === 'GET') {
-      const response = await fetch(apiUrl, {
-        headers: { Authorization: `token ${token}` },
-      });
-  
-      if (!response.ok) {
-        return res.status(500).json({ error: 'Failed to fetch itinerary.' });
-      }
-  
+      // Fetch the latest itinerary from GitHub
+      const response = await fetch(`https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/${FILE_PATH}`);
       const data = await response.json();
-      const content = atob(data.content);
-      res.status(200).json(JSON.parse(content));
+      return res.status(200).json(data);
     }
   
-    else if (req.method === 'POST') {
-      const getResponse = await fetch(apiUrl, {
-        headers: { Authorization: `token ${token}` },
+    if (req.method === 'POST') {
+      const plan = req.body;
+  
+      // Get the current file SHA for updating
+      const getFile = await fetch(fileUrl, {
+        headers: {
+          Authorization: `Bearer ${GITHUB_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
       });
   
-      const existing = await getResponse.json();
-      const newContent = Buffer.from(JSON.stringify(req.body, null, 2)).toString('base64');
+      const fileData = await getFile.json();
+      const sha = fileData.sha;
   
-      const response = await fetch(apiUrl, {
+      // Now send the updated file
+      const response = await fetch(fileUrl, {
         method: 'PUT',
         headers: {
-          Authorization: `token ${token}`,
+          Authorization: `Bearer ${GITHUB_TOKEN}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: 'Update itinerary.json',
-          content: newContent,
-          sha: existing.sha,
+          message: 'Update itinerary',
+          content: Buffer.from(JSON.stringify(plan, null, 2)).toString('base64'),
+          sha: sha,
         }),
       });
   
-      if (!response.ok) {
-        const err = await response.json();
-        return res.status(500).json({ error: 'Failed to save itinerary', details: err });
+      const result = await response.json();
+  
+      if (response.ok) {
+        return res.status(200).json({ message: 'Itinerary saved successfully', result });
+      } else {
+        return res.status(500).json({ message: 'Failed to save itinerary', result });
       }
-  
-      res.status(200).json({ message: 'Itinerary saved to GitHub!' });
     }
   
-    else {
-      res.setHeader('Allow', ['GET', 'POST']);
-      res.status(405).end(`Method ${req.method} Not Allowed`);
-    }
+    // Fallback
+    res.setHeader('Allow', ['GET', 'POST']);
+    res.status(405).end(`Method ${req.method} Not Allowed`);
   }
   
