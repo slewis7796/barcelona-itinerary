@@ -219,3 +219,23 @@ window.addEventListener('load', () => {
   setTimeout(() => loadPlan(), 500);
 });
 
+function savePlanFromUI() {
+  const plan = {};
+  document.querySelectorAll('.calendar-column').forEach(col => {
+    const day = col.dataset.day;
+    plan[day] = {};
+    col.querySelectorAll('.time-slot').forEach(slot => {
+      const slotName = slot.dataset.slot;
+      plan[day][slotName] = [];
+      slot.querySelectorAll('.item').forEach(item => {
+        if (item.dataset.id) {
+          plan[day][slotName].push(item.dataset.id);
+        }
+      });
+    });
+  });
+
+  savePlan(plan);
+}
+
+
