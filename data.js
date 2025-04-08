@@ -155,27 +155,19 @@ function clearPlan() {
 
 
 async function savePlan(plan) {
-  try {
-    const response = await fetch(serverUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(plan),
-    });
+  const response = await fetch('/api/itinerary', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(plan),
+  });
 
-    if (!response.ok) {
-      const error = await response.json();
-      console.error('❌ Error saving plan:', error);
-      alert('Failed to save itinerary.');
-    } else {
-      console.log('✅ Itinerary saved to server.');
-      alert('Itinerary saved!');
-
-      // Also prompt to save locally
-      await savePlanToLocalFile(plan);
-    }
-  } catch (err) {
-    console.error('❌ Save failed:', err);
+  if (!response.ok) {
+    const error = await response.json();
+    console.error('❌ Error saving plan:', error);
     alert('Failed to save itinerary.');
+  } else {
+    console.log('✅ Itinerary saved to GitHub!');
+    alert('Itinerary saved!');
   }
 }
 
