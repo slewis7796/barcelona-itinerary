@@ -46,12 +46,15 @@ function renderMapForDay(day, dayPlan) {
   
     // Apartment → First Stop
     const showApartmentLink = day >= "14" && day <= "19" && apartment && items[0];
-    if (showApartmentLink && apartment.address && items[0].address) {
-      const start = `${apartment.name}, ${apartment.address}`;
-      const end = `${items[0].name}, ${items[0].address}`;
-      const url = `https://www.google.com/maps/dir/${encodeURIComponent(start)}/${encodeURIComponent(end)}`;
-      links.push(`<a href="${url}" target="_blank">🏁 From Apartment → ${items[0].name}</a>`);
-    }
+const isFirstStopApartment = items[0]?.name === apartment?.name;
+
+if (showApartmentLink && !isFirstStopApartment && apartment.address && items[0].address) {
+  const start = `${apartment.name}, ${apartment.address}`;
+  const end = `${items[0].name}, ${items[0].address}`;
+  const url = `https://www.google.com/maps/dir/${encodeURIComponent(start)}/${encodeURIComponent(end)}`;
+  links.push(`<a href="${url}" target="_blank">🏁 From Apartment → ${items[0].name}</a>`);
+}
+
   
     // Step-by-step links
     for (let i = 0; i < items.length - 1; i++) {
