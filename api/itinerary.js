@@ -1,60 +1,38 @@
-// /api/itinerary.js
-
 export default async function handler(req, res) {
+    const GIST_ID = process.env.GIST_ID;
     const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-    const REPO = 'barcelona-itinerary'; // Replace if different
-    const USERNAME = 'slewis7796';
-    const FILE_PATH = 'itinerary.json';
-    const BRANCH = 'main';
   
-    const fileUrl = `https://api.github.com/repos/${USERNAME}/${REPO}/contents/${FILE_PATH}`;
+    const url = `https://api.github.com/gists/${GIST_ID}`;
   
     if (req.method === 'GET') {
-      // Fetch the latest itinerary from GitHub
-      const response = await fetch(`https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/${FILE_PATH}`);
-      const data = await response.json();
-      return res.status(200).json(data);
+      const response = await fetch(url, {
+        headers: { Authorization: `token ${GITHUB_TOKEN}` },
+      });
+      const gist = await response.json();
+      const content = gist.files['itinerary.json']?.content || '{}';
+      res.status(200).json(JSON.parse(content));
     }
   
-    if (req.method === 'POST') {
-      const plan = req.body;
-  
-      // Get the current file SHA for updating
-      const getFile = await fetch(fileUrl, {
+    else if (req.method === 'POST') {
+      const content = JSON.stringify(req.body, null, 2);
+      const response = await fetch(url, {
+        method: 'PATCH',
         headers: {
-          Authorization: `Bearer ${GITHUB_TOKEN}`,
-          'Content-Type': 'application/json',
-        },
-      });
-  
-      const fileData = await getFile.json();
-      const sha = fileData.sha;
-  
-      // Now send the updated file
-      const response = await fetch(fileUrl, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${GITHUB_TOKEN}`,
+          Authorization: `token ${GITHUB_TOKEN}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: 'Update itinerary',
-          content: Buffer.from(JSON.stringify(plan, null, 2)).toString('base64'),
-          sha: sha,
+          files: {
+            'itinerary.json': { content },
+          },
         }),
       });
-  
       const result = await response.json();
-  
-      if (response.ok) {
-        return res.status(200).json({ message: 'Itinerary saved successfully', result });
-      } else {
-        return res.status(500).json({ message: 'Failed to save itinerary', result });
-      }
+      res.status(200).json({ ok: true, result });
     }
   
-    // Fallback
-    res.setHeader('Allow', ['GET', 'POST']);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
+    else {
+      res.status(405).end();
+    }
   }
   
