@@ -154,22 +154,49 @@ function clearPlan() {
 }
 
 
-async function savePlan(plan) {
-  const response = await fetch(serverUrl, {
+function savePlan() {
+  const plan = {};
+  const apartmentId = items.find(item => item.name === "Barcelona Touch Apartments - Rosich")?.id;
+
+  document.querySelectorAll('.calendar-column').forEach(col => {
+    const day = col.dataset.day;
+    plan[day] = {};
+
+    col.querySelectorAll('.time-slot').forEach(slot => {
+      const slotName = slot.dataset.slot;
+      plan[day][slotName] = [];
+      slot.querySelectorAll('.item').forEach(item => {
+        if (item.dataset.id) {
+          plan[day][slotName].push(item.dataset.id);
+        }
+      });
+    });
+
+    // Inject the apartment into morning slot for days 14–19 if it's not already included
+    if (["14", "15", "16", "17", "18", "19"].includes(day) && apartmentId) {
+      const morning = plan[day].morning || [];
+      if (!morning.includes(apartmentId)) {
+        plan[day].morning = [apartmentId, ...morning];
+      }
+    }
+  });
+
+  // Save to localStorage or server
+  fetch(serverUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(plan),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    console.error('❌ Error saving plan:', error);
-    alert('Failed to save itinerary.');
-  } else {
-    console.log('✅ Itinerary saved!');
-    alert('Itinerary saved!');
-  }
+  })
+    .then(res => {
+      if (!res.ok) throw new Error("Failed to save");
+      alert("Itinerary saved!");
+    })
+    .catch(err => {
+      console.error("❌ Error saving plan:", err);
+      alert("Failed to save itinerary.");
+    });
 }
+
 
 async function loadPlan() {
   try {
