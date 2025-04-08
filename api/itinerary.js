@@ -1,66 +1,59 @@
-// api/itinerary.js — API endpoint for saving/loading itinerary via GitHub
+// api/itinerary.js
 
 export default async function handler(req, res) {
-    const GITHUB_REPO = 'slewis7796/barcelona-itinerary';
-    const FILE_PATH = 'itinerary.json'; // Can be 'api/itinerary.json' if preferred
-    const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+    const token = process.env.GITHUB_TOKEN;
+    const owner = 'slewis7796';
+    const repo = 'barcelona-itinerary';
+    const path = 'itinerary.json';
   
-    if (!GITHUB_TOKEN) {
-      return res.status(500).json({ error: 'Missing GitHub token' });
-    }
-  
-    const headers = {
-      Authorization: `token ${GITHUB_TOKEN}`,
-      Accept: 'application/vnd.github.v3+json',
-    };
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
   
     if (req.method === 'GET') {
-      try {
-        const fetchRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${FILE_PATH}`, {
-          headers,
-        });
-        const data = await fetchRes.json();
-        const content = Buffer.from(data.content, 'base64').toString();
-        res.status(200).json(JSON.parse(content));
-      } catch (err) {
-        res.status(500).json({ error: 'Failed to fetch itinerary', details: err });
+      const response = await fetch(apiUrl, {
+        headers: { Authorization: `token ${token}` },
+      });
+  
+      if (!response.ok) {
+        return res.status(500).json({ error: 'Failed to fetch itinerary.' });
       }
-    } else if (req.method === 'POST') {
-      try {
-        // First, get current file SHA
-        const currentRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${FILE_PATH}`, {
-          headers,
-        });
-        const current = await currentRes.json();
-        const sha = current.sha;
   
-        // Prepare new content
-        const newContent = Buffer.from(JSON.stringify(req.body, null, 2)).toString('base64');
+      const data = await response.json();
+      const content = atob(data.content);
+      res.status(200).json(JSON.parse(content));
+    }
   
-        // Push new version
-        const saveRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${FILE_PATH}`, {
-          method: 'PUT',
-          headers,
-          body: JSON.stringify({
-            message: 'Update itinerary.json',
-            content: newContent,
-            sha,
-          }),
-        });
+    else if (req.method === 'POST') {
+      const getResponse = await fetch(apiUrl, {
+        headers: { Authorization: `token ${token}` },
+      });
   
-        if (!saveRes.ok) {
-          const errRes = await saveRes.json();
-          return res.status(500).json({ error: 'GitHub save failed', details: errRes });
-        }
+      const existing = await getResponse.json();
+      const newContent = Buffer.from(JSON.stringify(req.body, null, 2)).toString('base64');
   
-        res.status(200).json({ message: 'Saved successfully' });
-      } catch (err) {
-        res.status(500).json({ error: 'Failed to save itinerary', details: err });
+      const response = await fetch(apiUrl, {
+        method: 'PUT',
+        headers: {
+          Authorization: `token ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: 'Update itinerary.json',
+          content: newContent,
+          sha: existing.sha,
+        }),
+      });
+  
+      if (!response.ok) {
+        const err = await response.json();
+        return res.status(500).json({ error: 'Failed to save itinerary', details: err });
       }
-    } else {
+  
+      res.status(200).json({ message: 'Itinerary saved to GitHub!' });
+    }
+  
+    else {
       res.setHeader('Allow', ['GET', 'POST']);
       res.status(405).end(`Method ${req.method} Not Allowed`);
     }
   }
-  
   
