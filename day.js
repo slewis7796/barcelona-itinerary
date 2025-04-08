@@ -11,24 +11,24 @@ function slugMap(ids) {
   return ids.map(id => itemsData.find(item => item.id === id)).filter(Boolean);
 }
 
-function updateDayPlan(day) {
-  const saved = JSON.parse(localStorage.getItem('barcelona-itinerary') || '{}');
-  const dayPlan = saved[day] || {};
-
-  ['morning', 'lunch', 'afternoon', 'dinner'].forEach(slot => {
-    const ul = document.getElementById(`${slot}-list`);
-    ul.innerHTML = '';
-
-    const items = slugMap(dayPlan[slot] || []);
-    items.forEach(item => {
-      const li = document.createElement('li');
-      li.innerHTML = `${item.emoji || ''} <strong>${item.name}</strong><br><small>${item.summary || ''}</small>`;
-      ul.appendChild(li);
+function updateDayPlan(day, plan) {
+    const dayPlan = plan[day] || {};
+  
+    ['morning', 'lunch', 'afternoon', 'dinner'].forEach(slot => {
+      const ul = document.getElementById(`${slot}-list`);
+      ul.innerHTML = '';
+  
+      const items = slugMap(dayPlan[slot] || []);
+      items.forEach(item => {
+        const li = document.createElement('li');
+        li.innerHTML = `${item.emoji || ''} <strong>${item.name}</strong><br><small>${item.summary || ''}</small>`;
+        ul.appendChild(li);
+      });
     });
-  });
-
-  renderMapForDay(day, dayPlan);
-}
+  
+    renderMapForDay(day, dayPlan);
+  }
+  
 
 function renderMapForDay(day, dayPlan) {
     const slotOrder = ['morning', 'lunch', 'afternoon', 'dinner'];
@@ -79,6 +79,16 @@ function renderMapForDay(day, dayPlan) {
       : "<p>No valid routes to show.</p>";
   }
       
+  async function loadItineraryFromServer(selectedDay) {
+    try {
+      const res = await fetch('/api/itinerary');
+      const plan = await res.json();
+      console.log("✅ Day plan loaded:", plan);
+      updateDayPlan(selectedDay, plan);
+    } catch (err) {
+      console.error("❌ Failed to load itinerary:", err);
+    }
+  }
   
 
 window.addEventListener('DOMContentLoaded', async () => {
@@ -94,15 +104,15 @@ window.addEventListener('DOMContentLoaded', async () => {
     newIndex = Math.max(0, Math.min(options.length - 1, newIndex));
     select.selectedIndex = newIndex;
     select.value = options[newIndex].value;
-    updateDayPlan(select.value);
-  }
+    loadItineraryFromServer(select.value);
+}
 
   prevBtn.addEventListener('click', () => changeDay(-1));
   nextBtn.addEventListener('click', () => changeDay(1));
 
   select.addEventListener('change', (e) => {
-    updateDayPlan(e.target.value);
-  });
+    loadItineraryFromServer(select.value);
+});
 
   // Auto-select correct day on load
   const today = new Date();
@@ -118,9 +128,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   const match = Array.from(select.options).find(opt => opt.value === defaultValue);
   if (match) {
     select.value = defaultValue;
-    updateDayPlan(defaultValue);
-  } else {
+    loadItineraryFromServer(defaultValue);
+} else {
     select.selectedIndex = 0;
-    updateDayPlan(select.value);
-  }
+    loadItineraryFromServer(select.value);
+}
 });
