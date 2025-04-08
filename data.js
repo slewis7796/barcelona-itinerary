@@ -154,48 +154,31 @@ function clearPlan() {
 }
 
 
-function savePlan() {
-  const plan = {};
-  const apartmentId = items.find(item => item.name === "Barcelona Touch Apartments - Rosich")?.id;
-
-  document.querySelectorAll('.calendar-column').forEach(col => {
-    const day = col.dataset.day;
-    plan[day] = {};
-
-    col.querySelectorAll('.time-slot').forEach(slot => {
-      const slotName = slot.dataset.slot;
-      plan[day][slotName] = [];
-      slot.querySelectorAll('.item').forEach(item => {
-        if (item.dataset.id) {
-          plan[day][slotName].push(item.dataset.id);
-        }
-      });
+async function savePlan(plan) {
+  try {
+    const response = await fetch(serverUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(plan),
     });
 
-    // Inject the apartment into morning slot for days 14–19 if it's not already included
-    if (["14", "15", "16", "17", "18", "19"].includes(day) && apartmentId) {
-      const morning = plan[day].morning || [];
-      if (!morning.includes(apartmentId)) {
-        plan[day].morning = [apartmentId, ...morning];
-      }
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('❌ Error saving plan:', error);
+      alert('Failed to save itinerary.');
+    } else {
+      console.log('✅ Itinerary saved to server.');
+      alert('Itinerary saved!');
+
+      // Also prompt to save locally
+      await savePlanToLocalFile(plan);
     }
-  });
-
-  // Save to localStorage or server
-  fetch(serverUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(plan),
-  })
-    .then(res => {
-      if (!res.ok) throw new Error("Failed to save");
-      alert("Itinerary saved!");
-    })
-    .catch(err => {
-      console.error("❌ Error saving plan:", err);
-      alert("Failed to save itinerary.");
-    });
+  } catch (err) {
+    console.error('❌ Save failed:', err);
+    alert('Failed to save itinerary.');
+  }
 }
+
 
 
 async function loadPlan() {
@@ -210,6 +193,20 @@ async function loadPlan() {
     console.error('❌ Failed to load itinerary:', err);
   }
 }
+
+async function savePlanToLocalFile(plan) {
+  const blob = new Blob([JSON.stringify(plan, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'itinerary.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 
 function applyPlan(plan) {
   document.querySelectorAll('.calendar-column').forEach(col => {
